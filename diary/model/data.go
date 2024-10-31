@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// GenerateTestData 生成一些測試資料
+// GenerateTestData
 func GenerateTestData() ([]User, []DailyQuestion, []UserDiary, []PublicQuestion, []PublicQuestionAnswer, []Vote) {
 	users := []User{
 		{ID: 1, Username: "user1", PasswordHash: "hashed_password1", Email: "user1@example.com", CreateAt: time.Now()},
