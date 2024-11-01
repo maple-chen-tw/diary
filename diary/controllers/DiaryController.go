@@ -1,7 +1,7 @@
-package controller
+package controllers
 
 import (
-	models "diary/model"
+	models "diary/models"
 	"net/http"
 	"strconv"
 	"time"
