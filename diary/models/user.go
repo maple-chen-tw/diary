@@ -24,3 +24,9 @@ func UpdateUser(db *gorm.DB, user *User) error {
 func DeleteUser(db *gorm.DB, id int) error {
 	return db.Delete(&User{}, id).Error
 }
+
+func GetUserByEmail(db *gorm.DB, email string) (User, error) {
+	var user User
+	result := db.Where("email = ?", email).First(&user)
+	return user, result.Error
+}
