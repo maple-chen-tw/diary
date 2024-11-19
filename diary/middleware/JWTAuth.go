@@ -54,6 +54,15 @@ func JWTAuth() gin.HandlerFunc {
 		if ok && token.Valid {
 			// 可以將用戶名、角色等信息存入上下文中
 			c.Set("username", claims["username"])
+
+			// 提取 userID，並確保轉換為 int
+			if userID, ok := claims["UserID"].(float64); ok {
+				c.Set("user_id", int(userID)) // 轉換 float64 為 int
+			} else {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID"})
+				c.Abort()
+				return
+			}
 		}
 
 		// 繼續處理請求

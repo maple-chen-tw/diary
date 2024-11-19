@@ -34,7 +34,7 @@
           }
   
           // 發送 GET 請求到後端 API，並將 JWT token 放入 Authorization 頭部
-          const response = await axios.get('/protected/profile', {
+          const response = await axios.get('/profile', {
             headers: {
               Authorization: `Bearer ${token}`,  // 傳送 JWT token
             },

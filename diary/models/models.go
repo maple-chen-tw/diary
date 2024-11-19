@@ -6,7 +6,7 @@ import (
 
 // User 代表 users 表中的用戶。
 type User struct {
-	ID           int       `json:"id" db:"id"`
+	UserID       int       `json:"user_id" db:"user_id"`
 	Username     string    `json:"username" db:"username"`
 	PasswordHash string    `json:"password_hash" db:"password_hash"`
 	Email        string    `json:"email" db:"email"`
@@ -15,18 +15,23 @@ type User struct {
 
 // DailyQuestion 代表 daily_questions 表中的每日問題。
 type DailyQuestion struct {
-	ID       int    `json:"id" db:"id"`
-	Question string `json:"question" db:"question"`
+	QuestionID int    `json:"question_id" db:"question_id"`
+	Question   string `json:"question" db:"question"`
 }
 
 // UserDiary 代表 user_diaries 表中的日記條目。
+// question_id 和 question 都存在，避免每次查询都要做Join。
 type UserDiary struct {
-	ID         int       `json:"id" db:"id"`
+	DiaryID    int       `json:"diary_id" db:"diary_id"`
+	UserID     int       `json:"user_id" db:"user_id"`
 	QuestionID int       `json:"question_id" db:"question_id"`
+	Question   string    `json:"question" db:"question"`
 	Content    string    `json:"content" db:"content"`
 	CreateAt   time.Time `json:"create_at" db:"create_at"`
 	UpdateAt   time.Time `json:"update_at" db:"update_at"`
 }
+
+//---
 
 // PublicQuestion 代表 public_questions 表中的公開問題。
 type PublicQuestion struct {

@@ -39,7 +39,7 @@ export default {
         const token = response.data.token;
         localStorage.setItem('jwt', token);
         console.log('Login successful, token stored');
-        this.$router.push('/profile');
+        this.$router.push('/diary');
       } catch (error) {
         if (error.response && error.response.status === 401) {
           alert('Invalid credentials');

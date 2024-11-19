@@ -8,7 +8,7 @@ import (
 
 func CreateUser(db *gorm.DB, user *User) error {
 	user.CreateAt = time.Now()
-	return db.Create(user).Error
+	return db.Create(&user).Error
 }
 
 func GetUserByUsername(db *gorm.DB, username string) (User, error) {

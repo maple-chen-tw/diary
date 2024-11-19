@@ -4,16 +4,16 @@
         <h2>Register</h2>
         <form @submit.prevent="register">
           <div class="input-group">
-            <input v-model="registerUsername" type="text" placeholder="Username" required />
+            <input v-model="username" type="text" placeholder="Username" required />
           </div>
           <div class="input-group">
-            <input v-model="registerEmail" type="email" placeholder="Email" required />
+            <input v-model="email" type="email" placeholder="Email" required />
           </div>
           <div class="input-group">
-            <input v-model="registerPassword" type="password" placeholder="Password" required />
+            <input v-model="password" type="password" placeholder="Password" required />
           </div>
           <div class="input-group">
-            <input v-model="registerConfirmPassword" type="password" placeholder="Confirm Password" required />
+            <input v-model="confirmPassword" type="password" placeholder="Confirm Password" required />
           </div>
           <button type="submit" class="register-btn">Register</button>
         </form>
@@ -31,26 +31,32 @@
   export default {
     data() {
       return {
-        registerUsername: '',
-        registerEmail: '',
-        registerPassword: '',
-        registerConfirmPassword: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
       };
     },
     methods: {
       async register() {
         // 基本的密碼匹配檢查
-        if (this.registerPassword !== this.registerConfirmPassword) {
+        if (this.password !== this.confirmPassword) {
           alert("Passwords don't match!");
           return;
         }
   
         try {
           const response = await axios.post('/register', {
-            username: this.registerUsername,
-            password: this.registerPassword,
-            email: this.registerEmail,
+            username: this.username,
+            password: this.password,
+            email: this.email,
+          }, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
+
+          console.log("Registration response:", response);
           if (response.data.success) {
             alert('Registration successful! You can now log in.');
             this.$router.push('/login');
