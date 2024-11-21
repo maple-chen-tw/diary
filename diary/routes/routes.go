@@ -45,6 +45,18 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		protected.DELETE("/diary/:id", func(c *gin.Context) {
 			controllers.DeleteDiary(c, db)
 		})
+		// Daily question related routes
+		protected.POST("/question", func(c *gin.Context) {
+			controllers.CreateDailyQuestion(c, db)
+		})
+
+		protected.GET("/question/:id", func(c *gin.Context) {
+			controllers.GetDailyQuestionByID(c, db)
+		})
+
+		protected.GET("/question/random", func(c *gin.Context) {
+			controllers.GetDailyQuestionByRandom(c, db)
+		})
 
 	}
 }
