@@ -40,10 +40,12 @@ export default {
   },
   methods: {
     // Fetch a single diary by ID
-    async fetchDiary(id) {
-      console.log('Fetching diary with ID:', id);
+    async fetchDiary(diary_id) {
+      console.log('Fetching diary with ID:', diary_id);
+
       try {
-        const response = await axios.get(`/diary/${id}`);
+        const response = await axios.get(`/diary/${diary_id}`);
+        console.log('Diary data received:', response.data); 
         const diary = response.data;
         this.diary = {
           diary_id: diary.diary_id,
@@ -61,7 +63,7 @@ export default {
     // Fetch a random question when creating a new diary
     async fetchRandomQuestion() {
       try {
-        const response = await axios.get('/daily-questions/random'); // Assuming this endpoint gives a random question
+        const response = await axios.get('/question/random'); // This gives a random question
         this.diary.title = response.data.question;
       } catch (error) {
         console.error('Error fetching random question:', error);
@@ -97,12 +99,12 @@ export default {
   },
   mounted() {
     console.log("Route Params:", this.$route.params);
-    const { id } = this.$route.params;
-    if (id && id !== 'new') {
-      this.fetchDiary(id);
-    } else {
-      this.fetchRandomQuestion();
-    }
+    const diary_id = this.$route.params.id;
+    if (diary_id === 'new') {
+    this.fetchRandomQuestion();  
+  } else if (diary_id) {
+    this.fetchDiary(diary_id);
+  }
   },
 };
 </script>

@@ -70,7 +70,20 @@ const routes = [
   {
     path: '/diary/:id',
     name: 'ViewDiary',
-    component: DiaryForm,  // You might want to create a separate ViewDiary component if necessary
+    component: DiaryForm,
+    beforeEnter: (to, from, next) => {
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        next('/login');
+      } else {
+        next();
+      }
+    }
+  },
+  {
+    path: '/question/random',
+    name: 'RandomQuestion',
+    component: DiaryForm,
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('jwt');
       if (!token) {
@@ -80,6 +93,7 @@ const routes = [
       }
     }
   }
+
 ];
 
 const router = createRouter({

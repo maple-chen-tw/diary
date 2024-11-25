@@ -13,8 +13,6 @@ func GetAllDiariesByUserID(db *gorm.DB, userID int) ([]UserDiary, error) {
 	return diaries, err
 }
 
-
-
 // CreateDiary 創建新的日記
 func CreateDiary(db *gorm.DB, diary *UserDiary) error {
 	diary.CreateAt = time.Now()
@@ -22,20 +20,37 @@ func CreateDiary(db *gorm.DB, diary *UserDiary) error {
 	return db.Create(diary).Error
 }
 
-// UpdateDiary 更新日記
-func UpdateDiary(db *gorm.DB, diary *UserDiary) error {
+func UpdateUserDiary(db *gorm.DB, diary *UserDiary) (*UserDiary, error) {
+
+	// Set the updated timestamp
 	diary.UpdateAt = time.Now()
-	return db.Save(diary).Error
+
+	// Perform the update operation
+	if err := db.Model(&UserDiary{}).
+		Where("diary_id = ?", diary.DiaryID).
+		Updates(map[string]interface{}{
+			"question_id": diary.QuestionID,
+			"question":    diary.Question,
+			"content":     diary.Content,
+			"update_at":   diary.UpdateAt,
+		}).Error; err != nil {
+		return nil, err
+	}
+
+	// Return the updated diary
+	return diary, nil
 }
 
-// GetDiaryByID 根據 ID 查找日記
-func GetDiaryByID(db *gorm.DB, id int) (*UserDiary, error) {
+// Get a UserDiary by diaryID
+func GetUserDiary(db *gorm.DB, diaryID int) (*UserDiary, error) {
 	var diary UserDiary
-	err := db.First(&diary, id).Error
-	return &diary, err
+	if err := db.Where("diary_id = ?", diaryID).First(&diary).Error; err != nil {
+		return nil, err
+	}
+	return &diary, nil
 }
 
-// DeleteDiary 根據 ID 刪除日記
+// Delete a UserDiary by diaryID
 func DeleteDiary(db *gorm.DB, id int) error {
 	var diary UserDiary
 	err := db.First(&diary, id).Error

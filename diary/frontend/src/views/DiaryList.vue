@@ -41,8 +41,8 @@ export default {
     },
 
     // Edit diary: Redirect to the edit page with the diary ID
-    editDiary(id) {
-      this.$router.push(`/diary/edit/${id}`);
+    editDiary(diary_id) {
+      this.$router.push(`/diary/edit/${diary_id}`);
     },
 
     // Create new diary: Redirect to the new diary page

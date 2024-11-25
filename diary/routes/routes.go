@@ -39,7 +39,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		})
 
 		protected.GET("/diary/:id", func(c *gin.Context) {
-			controllers.UndoDiary(c, db)
+			controllers.GetDiary(c, db)
 		})
 
 		protected.DELETE("/diary/:id", func(c *gin.Context) {
