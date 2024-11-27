@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	models "diary/models"
+	models "diary/app/models"
 	"log"
 	"net/http"
 	"time"

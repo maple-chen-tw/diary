@@ -1,15 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Login from '@/views/Login.vue';
+import HomePage from '@/views/HomePage.vue';
 import Register from '@/views/Register.vue';
 import Profile from '@/views/Profile.vue';
 import DiaryList from '@/views/DiaryList.vue';
-import DiaryForm from '@/views/DiaryForm.vue';
-
+import DiaryEdit from '@/views/DiaryEdit.vue';
+import DiaryView from '@/views/DiaryView.vue';
 
 const routes = [
-  { path: '/login', 
-    name: 'Login',
-    component: Login },
+  { path: '/', 
+    name: 'HomePage',
+    component: HomePage },
+
   {
     path: '/register',
     name: 'Register',
@@ -44,7 +45,7 @@ const routes = [
   {
     path: '/diary/new',
     name: 'CreateDiary',
-    component: DiaryForm,
+    component: DiaryEdit,
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('jwt');
       if (!token) {
@@ -57,7 +58,7 @@ const routes = [
   {
     path: '/diary/edit/:id',
     name: 'EditDiary',
-    component: DiaryForm,
+    component: DiaryEdit,
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('jwt');
       if (!token) {
@@ -70,7 +71,7 @@ const routes = [
   {
     path: '/diary/:id',
     name: 'ViewDiary',
-    component: DiaryForm,
+    component: DiaryView,
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('jwt');
       if (!token) {
@@ -83,7 +84,7 @@ const routes = [
   {
     path: '/question/random',
     name: 'RandomQuestion',
-    component: DiaryForm,
+    component: DiaryEdit,
     beforeEnter: (to, from, next) => {
       const token = localStorage.getItem('jwt');
       if (!token) {

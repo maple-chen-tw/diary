@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	models "diary/models"
+	models "diary/app/models"
 	"net/http"
 	"strconv"
 	"time"
@@ -108,17 +108,40 @@ func SaveDiary(c *gin.Context, db *gorm.DB) {
 
 // GetDiary
 func GetDiary(c *gin.Context, db *gorm.DB) {
+	// Step 1: Get the userID from the JWT token
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+		return
+	}
+
+	userIDInt, ok := userID.(int)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	// Step 2: Get the diary ID from the URL parameter
 	idStr := c.Param("id")
 	diaryID, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid diary ID"})
 		return
 	}
+
+	// Step 3: Fetch the diary from the database
 	userDiary, err := models.GetUserDiary(db, diaryID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Diary not found"})
 		return
 	}
+
+	// Step 4: Check if the diary belongs to the user from the JWT
+	if userDiary.UserID != userIDInt {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are not authorized to access this diary"})
+		return
+	}
+
 	c.JSON(http.StatusOK, userDiary)
 }
 

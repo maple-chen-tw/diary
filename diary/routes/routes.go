@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"diary/controllers"
-	"diary/middleware"
+	"diary/app/controllers"
+	"diary/app/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
