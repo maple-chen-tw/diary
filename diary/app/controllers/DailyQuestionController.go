@@ -18,13 +18,11 @@ func CreateDailyQuestion(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// 呼叫model layer創建問題
 	if err := models.CreateDailyQuestion(db, &newQuestion); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create daily question"})
 		return
 	}
 
-	// 返回創建成功的問題記錄
 	c.JSON(http.StatusCreated, gin.H{
 		"message":  "Daily question created successfully",
 		"question": newQuestion,
@@ -34,7 +32,7 @@ func CreateDailyQuestion(c *gin.Context, db *gorm.DB) {
 // GetDailyQuestionByID 根據問題 ID 獲取問題記錄
 func GetDailyQuestionByID(c *gin.Context, db *gorm.DB) {
 	// 從 URL 參數中提取問題 ID
-	idStr := c.Param("id")
+	idStr := c.Param("question_id")
 
 	// 將 string 類型的 id 轉換為 int
 	id, err := strconv.Atoi(idStr)

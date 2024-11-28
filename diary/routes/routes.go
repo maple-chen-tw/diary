@@ -30,19 +30,19 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			controllers.GetAllDiary(c, db)
 		})
 
-		protected.POST("/diary", func(c *gin.Context) {
+		protected.POST("/diary/new", func(c *gin.Context) {
 			controllers.CreateDiary(c, db)
 		})
 
-		protected.PUT("/diary/:id", func(c *gin.Context) {
+		protected.PUT("/diary/:diary_id", func(c *gin.Context) {
 			controllers.SaveDiary(c, db)
 		})
 
-		protected.GET("/diary/:id", func(c *gin.Context) {
+		protected.GET("/diary/:diary_id", func(c *gin.Context) {
 			controllers.GetDiary(c, db)
 		})
 
-		protected.DELETE("/diary/:id", func(c *gin.Context) {
+		protected.DELETE("/diary/:diary_id", func(c *gin.Context) {
 			controllers.DeleteDiary(c, db)
 		})
 		// Daily question related routes
@@ -50,7 +50,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			controllers.CreateDailyQuestion(c, db)
 		})
 
-		protected.GET("/question/:id", func(c *gin.Context) {
+		protected.GET("/question/:question_id", func(c *gin.Context) {
 			controllers.GetDailyQuestionByID(c, db)
 		})
 

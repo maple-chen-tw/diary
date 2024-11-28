@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,7 +19,17 @@ func GetAllDiariesByUserID(db *gorm.DB, userID int) ([]UserDiary, error) {
 func CreateDiary(db *gorm.DB, diary *UserDiary) error {
 	diary.CreateAt = time.Now()
 	diary.UpdateAt = time.Now()
-	return db.Create(diary).Error
+	if err := db.Create(diary).Error; err != nil {
+		return err
+	}
+	if diary.DiaryID == 0 {
+		if err := db.Last(diary).Error; err != nil {
+			return err
+		}
+		log.Printf("Manual ID retrieval: New diary created with ID: %d", diary.DiaryID)
+	}
+
+	return nil
 }
 
 func UpdateUserDiary(db *gorm.DB, diary *UserDiary) (*UserDiary, error) {
@@ -55,7 +67,15 @@ func DeleteDiary(db *gorm.DB, id int) error {
 	var diary UserDiary
 	err := db.First(&diary, id).Error
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("diary not found")
+		}
 		return err
 	}
-	return db.Delete(&diary).Error
+	err = db.Delete(&diary, id).Error
+	if err != nil {
+		return fmt.Errorf("failed to delete diary: %v", err)
+	}
+
+	return nil
 }

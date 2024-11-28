@@ -7,6 +7,7 @@
       </div>
       <div class="auth-buttons">
         <button @click="createDiary" class="auth-btn add-diary-btn">Add New Diary</button>
+        <button @click="logout" class="auth-btn logout-btn">Logout</button>
       </div>
     </div>
 
@@ -25,27 +26,17 @@
             @click="viewDiary(diary.diary_id)">
             <h3 class="diary-question">{{formatDate(diary.create_at)}} - {{ diary.question }}</h3>
             <p class="diary-content">{{ diary.content }}</p>
+            <p class="">{{ formatTime(diary.create_at) }}</p>
+          </button>
+          <button 
+            class="btn delete-btn" 
+            @click="deleteDiary(diary.diary_id)">
+            <i class="fa fa-trash"></i> <!-- 使用 Font Awesome 垃圾桶圖標 -->
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- Create Diary Modal -->
-    <div v-if="showCreateDiaryModal" class="modal-overlay">
-      <div class="modal">
-        <button @click="showCreateDiaryModal = false" class="close-btn">X</button>
-        <h2>Create New Diary</h2>
-        <form @submit.prevent="createDiaryEntry">
-          <div class="input-group">
-            <input v-model="diaryQuestion" type="text" placeholder="Enter your question" required />
-          </div>
-          <div class="input-group">
-            <textarea v-model="diaryContent" placeholder="Write your thoughts..." required></textarea>
-          </div>
-          <button type="submit" class="create-diary-btn">Create Diary</button>
-        </form>
-      </div>
-    </div>
+    </div>  
+    
   </div>
 </template>
 
@@ -57,12 +48,18 @@ export default {
   data() {
     return {
       diaries: [],
-      showCreateDiaryModal: false,
       diaryQuestion: '',
       diaryContent: '',
     };
   },
   methods: {
+    logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('jwt');
+        this.$router.push('/');
+      }
+    },
+
     // Fetch all diaries
     async fetchDiaries() {
       try {
@@ -73,33 +70,67 @@ export default {
       }
     },
 
-    // Create a new diary entry: Display the modal
-    createDiary() {
-      this.showCreateDiaryModal = true;
-    },
 
-    // Create diary entry action: Save to the server
-    async createDiaryEntry() {
-      try {
-        const response = await axios.post('/diary', {
-          question: this.diaryQuestion,
-          content: this.diaryContent,
+    createDiary() {
+      
+      axios.get('/question/random')
+      .then(response => {
+        const randomQuestionID = response.data.question.question_id;
+        const randomQuestion = response.data.question.question;
+        const newDiary = {
+          question_id: randomQuestionID,
+          question: randomQuestion,
+          content: '',
+        };
+        console.log(newDiary)
+        axios.post('/diary/new', newDiary, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+          }
+        })
+        .then(response => {
+          console.log("Create Diary Response:", response.data); 
+          if (response.data.diary_id !== 0) {
+            this.diaries.push(response.data);
+            console.log("New Diary Added:", this.diaries);
+            this.isCreatingNewDiary = false;
+          } else {
+            console.error("Diary creation failed. Invalid diary_id:", response.data);
+          }
+        })
+        .catch(error => {
+          console.error("Failed to create diary:", error);
         });
-        this.diaries.push(response.data);
-        this.showCreateDiaryModal = false;
-        this.diaryQuestion = '';
-        this.diaryContent = '';
-        alert('Diary entry created!');
-      } catch (error) {
-        console.error('Error creating diary:', error);
-        alert('An error occurred. Please try again.');
-      }
+      })
+      .catch(error => {
+        console.error("Failed to fetch random question:", error);
+      });
+      
     },
 
     // View a specific diary entry
     viewDiary(diary_id) {
       this.$router.push(`/diary/${diary_id}`);
     },
+
+    async deleteDiary(diary_id) {
+      if (confirm('Are you sure you want to delete this diary?')) {
+        try {
+          // Make the DELETE request to the server
+          await axios.delete(`/diary/${diary_id}`);
+        
+          // Remove the deleted diary from the local diaries list
+          this.diaries = this.diaries.filter(diary => diary.diary_id !== diary_id);
+        
+          // Optionally, navigate back to the diary list or show a success message
+          this.$router.push('/diary');
+        } catch (error) {
+          console.error('Error deleting diary:', error);
+        }
+      }
+    },
+
+
     formatDate(dateString) {
         if (!dateString) return "Invaild Date";
           
@@ -114,7 +145,22 @@ export default {
       
         // Return a formatted string in a readable format (e.g., 'MM/DD/YYYY')
         return date.toLocaleDateString(); 
-      }
+      },
+    formatTime(dateString){
+      if (!dateString) return "Invaild Date";
+      const date = new Date(dateString);
+      const options = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Enable 12-hour format (AM/PM)
+    };
+
+    // Return a formatted string in a readable format (e.g., 'MM/DD/YYYY 下午12:59')
+    return date.toLocaleString('zh-TW', options).replace(/上午|下午/g, (match) => match === '上午' ? 'AM' : 'PM');
+}
   },
   mounted() {
     this.fetchDiaries();
@@ -221,7 +267,6 @@ export default {
 
 .diary-btn:hover {
   background-color: #f1f1f1;
-  transform: translateY(-5px);
 }
 
 .diary-question {
@@ -319,4 +364,32 @@ export default {
 .close-btn:hover {
   color: #333;
 }
+
+.diary-item {
+  position: relative; /* 使垃圾桶按鈕能夠相對定位 */
+}
+
+.delete-btn {
+  position: absolute;
+  bottom: 10px; /* 距離底部 10px */
+  right: 10px;  /* 距離右邊 10px */
+  background-color: white;  /* 背景顏色 */
+  color: #808080; /* 淺灰色文字或圖標 */
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #f5f5f5; /* 當鼠標懸停時，背景顏色變為輕微灰色 */
+  color: #333; /* 當鼠標懸停時，顏色變為深灰 */
+}
+
+.delete-btn i {
+  font-size: 16px;
+}
+
+
 </style>

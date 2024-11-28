@@ -2,6 +2,7 @@ package controllers
 
 import (
 	models "diary/app/models"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -57,21 +58,25 @@ func CreateDiary(c *gin.Context, db *gorm.DB) {
 
 	// set up user_id
 	newDiary.UserID = userIDInt
-	newDiary.CreateAt = time.Now()
-	newDiary.UpdateAt = time.Now()
 
 	if err := models.CreateDiary(db, &newDiary); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create diary"})
 		return
 	}
 
+	if newDiary.DiaryID == 0 {
+		// Ensure the diary_id is correctly populated by fetching the last record
+		db.Last(&newDiary)
+		log.Printf("Manual ID retrieval: New diary created with ID: %d", newDiary.DiaryID)
+	}
+	log.Printf("New diary created with ID: %d", newDiary.DiaryID)
 	c.JSON(http.StatusCreated, newDiary)
 }
 
 // SaveDiary
 func SaveDiary(c *gin.Context, db *gorm.DB) {
 
-	idStr := c.Param("id")
+	idStr := c.Param("diary_id")
 	diaryID, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid diary ID"})
@@ -122,7 +127,7 @@ func GetDiary(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Step 2: Get the diary ID from the URL parameter
-	idStr := c.Param("id")
+	idStr := c.Param("diary_id")
 	diaryID, err := strconv.Atoi(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid diary ID"})
@@ -145,7 +150,32 @@ func GetDiary(c *gin.Context, db *gorm.DB) {
 	c.JSON(http.StatusOK, userDiary)
 }
 
-// DeleteDiary 刪除日記
+// DeleteDiary
 func DeleteDiary(c *gin.Context, db *gorm.DB) {
+	// Get diary ID from the URL parameters
+	id := c.Param("diary_id") // ID is passed as a URL parameter, e.g. /diaries/:diary_id
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "diary ID is required"})
+		return
+	}
 
+	// Convert the ID to an integer
+	diaryID, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid diary ID"})
+		return
+	}
+
+	err = models.DeleteDiary(db, diaryID)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "diary not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete diary", "message": err.Error()})
+		}
+		return
+	}
+
+	// Respond with success message (204 No Content is ideal for deletions)
+	c.JSON(http.StatusNoContent, nil)
 }

@@ -22,7 +22,7 @@ type DailyQuestion struct {
 // UserDiary 代表 user_diaries 表中的日記條目。
 // question_id 和 question 都存在，避免每次查询都要做Join。
 type UserDiary struct {
-	DiaryID    int       `json:"diary_id" db:"diary_id"`
+	DiaryID    int       `json:"diary_id" gorm:"primary_key;auto_increment" db:"diary_id"`
 	UserID     int       `json:"user_id" db:"user_id"`
 	QuestionID int       `json:"question_id" db:"question_id"`
 	Question   string    `json:"question" db:"question"`
