@@ -2,10 +2,27 @@
   <div class="diary-form-container">
     <h1>{{ isEdit ? 'Edit Diary' : 'Create New Diary' }}</h1>
 
+    <button @click="showModal = true" class="btn btn-info btn-sm ml-2">Change a Question</button>
+    
+    <!-- 可選問題的浮動視窗 -->
+    <div v-if="showModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2>Question List
+          <button @click="closeModal" class="btn btn-secondary">X</button>
+        </h2>
+        <ul>
+          <li v-for="(question, index) in availableQuestions" :key="index">
+            <button @click="selectQuestion(question)" class="btn btn-link">{{ question }}</button>
+          </li>
+        </ul>
+        
+      </div>
+    </div>
+
     <form @submit.prevent="saveDiary" class="diary-form">
       <div class="form-group">
         <label for="question">Question</label>
-        <input v-model="diary.question" id="question" type="text" required placeholder="Enter your question here" />
+        <input v-model="diary.question" id="question" type="text" required placeholder="Enter your question here" disabled  />
       </div>
 
       <div class="form-group">
@@ -36,6 +53,7 @@ export default {
         UpdateAt: null,
       },
       isEdit: false, // Flag to check if we're in edit mode
+      showModal: false,
     };
   },
   methods: {
@@ -89,6 +107,9 @@ export default {
     // Cancel editing and go back to the diary list
     cancelEdit() {
       this.$router.push('/diary'); // Navigate back to the diary list page
+    },
+    closeModal() {
+      this.showModal = false;
     },
   },
   computed: {
@@ -192,4 +213,40 @@ button {
 button:focus {
   outline: none;
 }
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 300px;
+  text-align: center;
+}
+
+.modal-content h2 {
+  margin-bottom: 15px;
+}
+
+.modal-content button {
+  margin-top: 10px;
+}
+
+button {
+  cursor: pointer;
+}
+
+
 </style>

@@ -20,7 +20,7 @@ func generateJWT(user models.User) (string, error) {
 	claims := jwt.MapClaims{
 		"username": user.Username,
 		"UserID":   user.UserID,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(), // 設定過期時間 24 小時
+		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	}
 
 	// 創建 JWT token

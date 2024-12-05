@@ -15,19 +15,19 @@ import (
 func GetAllDiary(c *gin.Context, db *gorm.DB) {
 
 	// get user_id from JWT token
-	userID, exists := c.Get("user_id")
+	rawID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
-	userIDInt, ok := userID.(int)
+	id, ok := rawID.(int)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
-	diaries, err := models.GetAllDiariesByUserID(db, userIDInt)
+	diaries, err := models.GetAllDiariesByUserID(db, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -37,78 +37,73 @@ func GetAllDiary(c *gin.Context, db *gorm.DB) {
 
 // Create New Diary
 func CreateDiary(c *gin.Context, db *gorm.DB) {
-	var newDiary models.UserDiary
-	if err := c.ShouldBindJSON(&newDiary); err != nil {
+	var d models.UserDiary
+	if err := c.ShouldBindJSON(&d); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// get user_id from JWT token
-	userID, exists := c.Get("user_id")
+	rawID, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
 		return
 	}
 
-	userIDInt, ok := userID.(int)
+	id, ok := rawID.(int)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
 	// set up user_id
-	newDiary.UserID = userIDInt
-
-	if err := models.CreateDiary(db, &newDiary); err != nil {
+	d.UserID = id
+	d.CreateAt = time.Now()
+	d.UpdateAt = time.Now()
+	if err := models.CreateDiary(db, &d); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create diary"})
 		return
 	}
-
-	if newDiary.DiaryID == 0 {
-		// Ensure the diary_id is correctly populated by fetching the last record
-		db.Last(&newDiary)
-		log.Printf("Manual ID retrieval: New diary created with ID: %d", newDiary.DiaryID)
-	}
-	log.Printf("New diary created with ID: %d", newDiary.DiaryID)
-	c.JSON(http.StatusCreated, newDiary)
+	log.Printf("New diary created with ID: %d", d.DiaryID)
+	c.JSON(http.StatusCreated, d)
 }
 
 // SaveDiary
 func SaveDiary(c *gin.Context, db *gorm.DB) {
 
-	idStr := c.Param("diary_id")
-	diaryID, err := strconv.Atoi(idStr)
+	rawDiaryID := c.Param("diary_id")
+	diaryID, err := strconv.Atoi(rawDiaryID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid diary ID"})
 		return
 	}
 
-	userDiary, err := models.GetUserDiary(db, diaryID)
+	rawDiary, err := models.GetUserDiary(db, diaryID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Diary not found"})
 		return
 	}
 	// check if user_id have authorization of the diary
 	userID, exists := c.Get("user_id")
-	if !exists || userDiary.UserID != userID {
+	if !exists || rawDiary.UserID != userID {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "You are not authorized to update this diary"})
 		return
 	}
 
-	if err := c.ShouldBindJSON(&userDiary); err != nil {
+	if err := c.ShouldBindJSON(&rawDiary); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	userDiary.UpdateAt = time.Now()
+	rawDiary.UpdateAt = time.Now()
 
 	// update diary data
-	updatedDiary, err := models.UpdateUserDiary(db, userDiary)
+	d, err := models.UpdateUserDiary(db, rawDiary)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update diary"})
 		return
 	}
-	c.JSON(http.StatusOK, updatedDiary)
+	c.JSON(http.StatusOK, d)
 }
 
 // GetDiary
