@@ -17,8 +17,7 @@ func GetAllDiariesByUserID(db *gorm.DB, userID int) ([]UserDiary, error) {
 
 // CreateDiary 創建新的日記
 func CreateDiary(db *gorm.DB, diary *UserDiary) error {
-	diary.CreateAt = time.Now()
-	diary.UpdateAt = time.Now()
+
 	if err := db.Create(diary).Error; err != nil {
 		return err
 	}

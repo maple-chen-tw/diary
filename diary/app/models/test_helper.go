@@ -20,7 +20,7 @@ func SetupTestDB() (*gorm.DB, error) {
 	}
 
 	// Auto-migrate the UserDiary schema
-	err = db.AutoMigrate(&DailyQuestion{}, &UserDiary{}, &User{})
+	err = db.AutoMigrate(&DailyQuestion{}, &UserDiary{}, &User{}, &PublicQuestion{}, &PublicQuestionAnswer{})
 	if err != nil {
 		return nil, err
 	}

@@ -34,9 +34,7 @@ func TestCreateDailyQuestion(t *testing.T) {
 func TestGetDailyQuestionByID(t *testing.T) {
 	// Set up the test database
 	db, err := SetupTestDB()
-	if err != nil {
-		t.Fatalf("failed to setup test DB: %v", err)
-	}
+	assert.Nil(t, err)
 
 	// Create a new DailyQuestion instance
 	dailyQuestion := &DailyQuestion{
